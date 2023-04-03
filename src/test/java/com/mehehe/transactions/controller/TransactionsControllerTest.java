@@ -2,6 +2,7 @@ package com.mehehe.transactions.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -70,7 +71,7 @@ class TransactionsControllerTest {
     private final TransactionsController transactionsController = new TransactionsController();
 
     @Test
-    void report() throws JsonProcessingException {
+    void testSingle() throws JsonProcessingException {
         //given
         final List<Transaction> request = objectMapper.readValue(REQUEST_STR, new TypeReference<>() {
         });
@@ -83,5 +84,25 @@ class TransactionsControllerTest {
         //then
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(expectedResponse, result.getBody());
+    }
+
+    @Test
+    void stressTest() throws JsonProcessingException {
+        //given
+        final List<Transaction> request = objectMapper.readValue(REQUEST_STR, new TypeReference<>() {
+        });
+        final List<Account> expectedResponse = objectMapper.readValue(RESPONSE_STR, new TypeReference<>() {
+        });
+        List<Transaction> requestMultiplied = new ArrayList<>(100000);
+        for (int i = 0; i < (100000 / request.size()) + 1; i++) {
+            requestMultiplied.addAll(request);
+        }
+
+        //when
+        final ResponseEntity<List<Account>> result = transactionsController.report(requestMultiplied);
+
+        //then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(expectedResponse.size(), result.getBody().size());
     }
 }
