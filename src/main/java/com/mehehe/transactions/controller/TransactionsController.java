@@ -23,10 +23,12 @@ public class TransactionsController implements TransactionsApi {
     @Override
     public ResponseEntity<List<Account>> report(final List<Transaction> transaction) {
         final List<Account> result = transaction.stream()
+                .parallel()
                 .flatMap(TransactionsController::mapToEvents)
                 .collect(Collectors.groupingBy(e -> e.account))
                 .entrySet()
                 .stream()
+                .parallel()
                 .map(TransactionsController::mapToAccount)
                 .sorted(Comparator.comparing(Account::getAccount))
                 .collect(Collectors.toList());

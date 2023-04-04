@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,9 +68,9 @@ class TransactionsControllerTest {
                         
             """;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
     private final TransactionsController transactionsController = new TransactionsController();
 
+    @Order(1)
     @Test
     void testSingle() throws JsonProcessingException {
         //given
@@ -86,8 +87,30 @@ class TransactionsControllerTest {
         assertEquals(expectedResponse, result.getBody());
     }
 
+    @Order(2)
     @Test
     void stressTest() throws JsonProcessingException {
+        //given
+        final List<Transaction> request = objectMapper.readValue(REQUEST_STR, new TypeReference<>() {
+        });
+        final List<Account> expectedResponse = objectMapper.readValue(RESPONSE_STR, new TypeReference<>() {
+        });
+        List<Transaction> requestMultiplied = new ArrayList<>(100000);
+        for (int i = 0; i < (100000 / request.size()) + 1; i++) {
+            requestMultiplied.addAll(request);
+        }
+
+        //when
+        final ResponseEntity<List<Account>> result = transactionsController.report(requestMultiplied);
+
+        //then
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(expectedResponse.size(), result.getBody().size());
+    }
+
+    @Order(3)
+    @Test
+    void stressTest2() throws JsonProcessingException {
         //given
         final List<Transaction> request = objectMapper.readValue(REQUEST_STR, new TypeReference<>() {
         });
