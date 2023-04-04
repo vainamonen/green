@@ -64,8 +64,6 @@ class TransactionsControllerTest {
                 "balance": 150.80
               }
             ]
-                        
-                        
             """;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final TransactionsController transactionsController = new TransactionsController();
