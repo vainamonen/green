@@ -131,12 +131,7 @@ class OnlinegameControllerTest {
         });
         final List<List<Clan>> expectedResponse = objectMapper.readValue(RESPONSE_STR, new TypeReference<>() {
         });
-        final List<Clan> clans = request.getClans();
-        final List<Clan> requestMultiplied = new ArrayList<>();
-        for (int i = 0; i < (100000 / clans.size()) + 1; i++) {
-            requestMultiplied.addAll(clans);
-        }
-        request.setClans(requestMultiplied);
+        multiplyRequest(request);
 
         //when
         final ResponseEntity<List<List<Clan>>> result = onlinegameController.calculate(request);
@@ -154,12 +149,7 @@ class OnlinegameControllerTest {
         });
         final List<List<Clan>> expectedResponse = objectMapper.readValue(RESPONSE_STR, new TypeReference<>() {
         });
-        final List<Clan> clans = request.getClans();
-        final List<Clan> requestMultiplied = new ArrayList<>();
-        for (int i = 0; i < (100000 / clans.size()) + 1; i++) {
-            requestMultiplied.addAll(clans);
-        }
-        request.setClans(requestMultiplied);
+        multiplyRequest(request);
 
         //when
         final ResponseEntity<List<List<Clan>>> result = onlinegameController.calculate(request);
@@ -167,5 +157,25 @@ class OnlinegameControllerTest {
         //then
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(expectedResponse.size(), result.getBody().size());
+    }
+
+    private static void multiplyRequest(final Players request) {
+        final List<Clan> clans = request.getClans();
+        final List<Clan> requestMultiplied = new ArrayList<>();
+        for (int i = 0; i < (100000 / clans.size()) + 1; i++) {
+            final List<Clan> clansClone = new ArrayList<>(clans.size());
+            for (Clan clan : clans) {
+                clansClone.add(of(clan.getNumberOfPlayers(), clan.getPoints()));
+            }
+            requestMultiplied.addAll(clansClone);
+        }
+        request.setClans(requestMultiplied);
+    }
+
+    private static Clan of(final int numberOfPlayers, final int points) {
+        final Clan clan = new Clan();
+        clan.setNumberOfPlayers(numberOfPlayers);
+        clan.setPoints(points);
+        return clan;
     }
 }
